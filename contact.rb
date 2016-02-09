@@ -35,14 +35,18 @@ class Contact
 
     # Returns the contact with the specified id. If no contact has the id, returns nil.
     def find(id)
-      # TODO: Find the Contact in the 'contacts.csv' file with the matching id.
       entry = File.open('csv.txt', 'r').readlines[id]
-      entry
     end
 
     # Returns an array of contacts who match the given term.
     def search(term)
-      # TODO: Select the Contact instances from the 'contacts.csv' file whose name or email attributes contain the search term.
+      matches = []
+      n = 0
+      File.open('csv.txt', 'r').readlines.each do |line|
+        n += 1
+        matches << "#{n}, #{line}" if line[/#{term}/]
+      end
+      matches
     end
 
   end

@@ -45,7 +45,19 @@ class ContactList
         puts "contact not found"
       end
     when 'search'
-      Contact.search(term)
+      puts "Enter a search term (ex. name)"
+      term = gets.chomp
+      matches = Contact.search(term)
+      n = 0
+      matches.each do |contact|
+        n += 1
+        id = contact.split(', ')[0]
+        name = contact.split(', ')[1]
+        email = contact.split(', ')[2]
+        puts "#{id}: #{name} #{email}"
+      end
+      puts "---"
+      puts "#{n} record total"
     end
   end
 end
