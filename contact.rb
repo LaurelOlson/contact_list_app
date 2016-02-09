@@ -6,6 +6,9 @@ class Contact
   attr_accessor :name, :email
 
   def initialize(name, email)
+    @name = name
+    @email = email
+    
     # TODO: Assign parameter values to instance variables.
   end
 
@@ -28,7 +31,11 @@ class Contact
 
     # Creates a new contact, adding it to the database, returning the new contact.
     def create(name, email)
-      # TODO: Instantiate a Contact, add its data to the 'contacts.csv' file, and return it.
+      new_contact = Contact.new(name, email)
+      File.open('csv.txt', 'a') do |file|
+        file.write "#{name}, #{email}\n"
+      end
+      new_contact
     end
 
     # Returns the contact with the specified id. If no contact has the id, returns nil.

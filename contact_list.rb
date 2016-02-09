@@ -1,5 +1,6 @@
 
 require_relative 'contact'
+require 'pry'
 
 # Interfaces between a user and their contact list. Reads from and writes to standard I/O.
 class ContactList
@@ -17,11 +18,11 @@ class ContactList
 
     case @command
     when 'new'
-      puts "Contact name:"
+      puts "Full name of contact name:"
       name = gets.chomp
-      puts "Contact email:"
+      puts "Email:"
       email = gets.chomp
-      Contact.new.create(name, email)
+      Contact.create(name, email)
     when 'list'
       Contact.all
     when 'show'
@@ -31,5 +32,5 @@ class ContactList
     end
   end
 end
-
+binding.pry
 ContactList.new
