@@ -24,9 +24,26 @@ class ContactList
       email = gets.chomp
       Contact.create(name, email)
     when 'list'
-      Contact.all
+      n = 0
+      Contact.all.each do |entry|
+        n += 1
+        name = entry.split(', ')[0]
+        email = entry.split(', ')[1].chomp
+        puts "#{name} (#{email})"
+      end
+      puts "---"
+      puts "#{n} records total"
     when 'show'
-      Contact.find(id)
+      puts "what is the ID for the contact you wish to view?"
+      id = gets.chomp.to_i
+      contact = Contact.find(id)
+      if contact
+        contact = contact.chomp.split(', ')
+        puts "name: #{contact[0]}"
+        puts "email: #{contact[1]}"
+      else
+        puts "contact not found"
+      end
     when 'search'
       Contact.search(term)
     end

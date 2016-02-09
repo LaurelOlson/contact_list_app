@@ -17,16 +17,11 @@ class Contact
 
     # Returns an Array of Contacts loaded from the database.
     def all
-      n = 0
+      contacts = []
       File.open('csv.txt', 'r').readlines.each do |line|
-        name = line.split(', ')[0]
-        email = line.split(', ')[1].chomp
-        n += 1
-        puts "#{n}: #{name} (#{email})"
+        contacts << line
       end
-      puts "---"
-      puts "#{n} records total"
-      # TODO: Return an Array of Contact instances made from the data in 'contacts.csv'.
+      contacts
     end
 
     # Creates a new contact, adding it to the database, returning the new contact.
@@ -41,6 +36,8 @@ class Contact
     # Returns the contact with the specified id. If no contact has the id, returns nil.
     def find(id)
       # TODO: Find the Contact in the 'contacts.csv' file with the matching id.
+      entry = File.open('csv.txt', 'r').readlines[id]
+      entry
     end
 
     # Returns an array of contacts who match the given term.
