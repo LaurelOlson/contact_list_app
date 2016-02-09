@@ -22,7 +22,11 @@ class ContactList
       name = gets.chomp
       puts "Email:"
       email = gets.chomp
-      Contact.create(name, email)
+      if Contact.search(email).empty?
+        Contact.create(name, email)
+      else
+        puts "Contact already exists."
+      end
     when 'list'
       n = 0
       Contact.all.each do |entry|
