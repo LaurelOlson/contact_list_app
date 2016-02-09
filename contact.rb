@@ -14,6 +14,15 @@ class Contact
 
     # Returns an Array of Contacts loaded from the database.
     def all
+      n = 0
+      File.open('csv.txt', 'r').readlines.each do |line|
+        name = line.split(', ')[0]
+        email = line.split(', ')[1].chomp
+        n += 1
+        puts "#{n}: #{name} (#{email})"
+      end
+      puts "---"
+      puts "#{n} records total"
       # TODO: Return an Array of Contact instances made from the data in 'contacts.csv'.
     end
 
