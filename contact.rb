@@ -1,16 +1,22 @@
-require 'csv'
+require 'pg'
 
 # Represents a person in an address book.
 class Contact
 
-  CSV_FNAME = 'csv.txt'
-  attr_accessor :name, :email, :phone_number, :id
+  # CSV_FNAME = 'csv.txt'
 
-  def initialize(name, email, phone_number, id=nil)
+  attr_accessor :name, :email, :phone_number
+  attr_reader :id
+
+  def initialize(name, email, id=nil)
     @name = name
     @email = email
-    @phone_number = phone_number
-    @id = id
+    # @phone_number = phone_number
+  end
+  
+  def self.connection
+    conn = PG::Connection.new(host: 'localhost', port: 5432, dbname: 'contact_list', user: 'development', password: 'development')
+    conn
   end
 
   # Creates a string representation of Contact instances in contacts
@@ -23,22 +29,17 @@ class Contact
 
     # Returns an Array of Contacts loaded from the database.
     def all
-      contacts = []
-      id = 1
-      CSV.foreach(CSV_FNAME) do |row|
-        name = row[0]
-        email = row[1]
-        phone_number = row[2]
-        contacts << Contact.new(name, email, phone_number, id)
-        id += 1
+      all_contacts = []
+      results = self.connection.exec("SELECT * FROM contacts;")
+      results.each do |contact|
+        all_contacts << Contact.new(contact['name'], contact['email'], contact ['id'])
       end
-      contacts
+      all_contacts
     end
 
     # Creates a new contact, returning the new contact.
     def create(name, email, phone_number)
       new_contact = Contact.new(name, email, phone_number)
-
     end
 
     # Adds new contact to the database
@@ -55,6 +56,7 @@ class Contact
 
     # Returns an array of Contacts who match the given term.
     def search(term)
+      # matches = Contact.all.find { |contact| contact.name =~ /#{term}/ }
       matches = []
       id = 1
       CSV.foreach(CSV_FNAME) do |row|
