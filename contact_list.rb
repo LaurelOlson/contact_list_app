@@ -19,7 +19,7 @@ class ContactList
 
     case command
     when 'new'
-      ContactList.make_new_contact
+      ContactList.create
     when 'list'
       ContactList.list
     when 'show'
@@ -29,19 +29,19 @@ class ContactList
     end
   end
 
-  def self.make_new_contact
+  def self.create
     puts "Full name of contact:" unless ARGV[1]
     name = ARGV[1] || STDIN.gets.chomp
     puts "Email:" unless ARGV[2]
     email = ARGV[2] || STDIN.gets.chomp
-    puts "Phone number (separate type and number with a space, and multiple numbers with a semicolon ex. mobile: 778-999-7777; home 604-555-6666):" unless ARGV[3]
-    phone_number = ARGV[3] || STDIN.gets.chomp
+    # puts "Phone number (separate type and number with a space, and multiple numbers with a semicolon ex. mobile: 778-999-7777; home 604-555-6666):" unless ARGV[3]
+    # phone_number = ARGV[3] || STDIN.gets.chomp
 
-    if Contact.search(email).empty?
-      Contact.add_to_db(name, email, phone_number)
-    else
-      puts "Contact already exists."
-    end
+    # if Contact.search(email).empty?
+    Contact.create(name, email)
+    # else
+      # puts "Contact already exists."
+    # end
   end
 
   def self.list
