@@ -7,12 +7,13 @@ require 'pry'
 class ContactList
 
   def initialize
-    if ARGV[0]
+    unless ARGV[0]
       puts "Here is a list of available commands:"
       puts "\tnew \t- Create a new contact"
       puts "\tlist \t- List all contacts"
       puts "\tshow \t- Show a contact"
       puts "\tsearch \t- Search contacts"
+      puts "\tupdate \t- Update an existing contact"
     end
 
     command = ARGV[0] || STDIN.gets.chomp
@@ -26,6 +27,8 @@ class ContactList
       ContactList.show
     when 'search'
       ContactList.search
+    when 'update'
+      ContactList.update
     end
   end
 
@@ -63,12 +66,27 @@ class ContactList
   end
 
   def self.search
-    puts "Search by name, email, or index?" unless ARGV[1]
+    puts "Search by name, email, or id?" unless ARGV[1]
     key = ARGV[1] || STDIN.gets.chomp 
-    puts "Which #{key} are you looking for?" unless ARGV[2]
-    value = ARGV[2] || STDIN.get.chomp
-    formatted_matches = Contact.search(key, value).map { |match| match.to_s }
-    self.paginate(formatted_matches, 5)
+    if ['name', 'email', 'id'].include?(key)
+      puts "Which #{key} are you looking for?" unless ARGV[2]
+      value = ARGV[2] || STDIN.get.chomp
+      formatted_matches = Contact.search(key, value).map { |match| match.to_s }
+      self.paginate(formatted_matches, 5)
+    else
+      puts "#{key} is not a valid search parameter"
+    end
+  end
+
+  def self.update
+    puts "What is the id of the contact you wish to update?" unless ARGV[1]
+    id = ARGV[1] || STDIN.gets.chomp
+    contact = Contact.find(id)
+    puts "What is the new name for contact #{id}?" unless ARGV[2]
+    contact.name = ARGV[2] || STDIN.gets.chomp
+    puts "What is the new email for contact #{id}" unless ARGV[3]
+    contact.email = ARGV[3] || STDIN.gets.chomp
+    contact.save
   end
 
   def self.paginate(contacts, per_page)

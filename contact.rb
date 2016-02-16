@@ -27,18 +27,14 @@ class Contact
 
   # Returns an Array of Contacts loaded from the database.
   def self.all
-    all_contacts = []
     results = self.connection.exec("SELECT * FROM contacts;")
-    results.each do |contact|
-      all_contacts << Contact.new(contact['name'], contact['email'], contact ['id'])
-    end
-    all_contacts
+    process_results(results)
   end
 
   # Creates a new contact, returning the new contact.
   def self.create(name, email)
     contact = Contact.new(name, email)
-    contact.save(name, email)
+    contact.save
   end
 
   # Adds new contact to the database
@@ -50,45 +46,37 @@ class Contact
 
   # Returns the contact with the specified id. If no contact has the id, returns nil.
   def self.find(id)
-    CONN.exec_params("SELECT * FROM contacts WHERE id = $1::int LIMIT 1;", [id])
+    result = CONN.exec_params("SELECT * FROM contacts WHERE id = $1::int LIMIT 1;", [id])
+    Contact.new(result[0]["name"], result[0]["email"], result[0]["id"])
     # CSV.read(CSV_FNAME)[(id-1)]
   end
 
   # Returns an array of Contacts who match the given term.
   def self.search(key, value)
-    # matches = Contact.all.find { |contact| contact.name =~ /#{term}/ }
     results = CONN.exec_params("SELECT * FROM contacts WHERE #{key} = $1;", [value])
+    process_results(results)
+  end
 
-    matches = []
+  def self.process_results(results)
+    contacts = []
     results.each do |contact|
-      matches << Contact.new(contact["name"], contact["email"], contact["id"])
+      contacts << Contact.new(contact["name"], contact["email"], contact["id"])
     end
-
-    matches
-
-    # matches = []
-    # id = 1
-    # CSV.foreach(CSV_FNAME) do |row|
-    #   name = row[0]
-    #   email = row[1]
-    #   phone_number = row[2]
-    #   matches << Contact.new(name, email, phone_number, id) unless row.grep(/#{term}/).empty?
-    #   id += 1
-    # end
-    # matches
+    contacts
   end
 
   def persisted?
     !id.nil?
   end
 
-  def save(name, email)
+  def save
     if persisted?
       # save updated info
+      CONN.exec_params("UPDATE contacts SET name = $1, email = $2 WHERE id = $3::int;", [@name, @email, @id])
     else
       #save new info
-      result = CONN.exec_params("INSERT INTO contacts(name, email) VALUES ($1, $2) RETURNING id;", [name, email])
-      result[0]["id"]
+      result = CONN.exec_params("INSERT INTO contacts(name, email) VALUES ($1, $2) RETURNING id;", [@name, @email])
+      @id = result[0]["id"]
     end
   end
 
