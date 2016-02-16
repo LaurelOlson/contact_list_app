@@ -1,9 +1,7 @@
 require 'pg'
 
-# Represents a person in an address book.
 class Contact
 
-  # CSV_FNAME = 'csv.txt'
   CONN = PG::Connection.new(host: 'localhost', port: 5432, dbname: 'contact_list', user: 'development', password: 'development')
 
   attr_accessor :name, :email, :phone_number
@@ -31,27 +29,20 @@ class Contact
     process_results(results)
   end
 
-  # Creates a new contact, returning the new contact.
+  # Creates a new contact and saves the contact to the database, returning the new contact.
   def self.create(name, email)
     contact = Contact.new(name, email)
     contact.save
-  end
-
-  # Adds new contact to the database
-  def self.add_to_db(name, email, phone_number)
-    CSV.open(CSV_FNAME, 'ab') do |csv|
-      csv << ["#{name}", "#{email}", "#{phone_number}"]
-    end
+    contact
   end
 
   # Returns the contact with the specified id. If no contact has the id, returns nil.
   def self.find(id)
     result = CONN.exec_params("SELECT * FROM contacts WHERE id = $1::int LIMIT 1;", [id])
     Contact.new(result[0]["name"], result[0]["email"], result[0]["id"])
-    # CSV.read(CSV_FNAME)[(id-1)]
   end
 
-  # Returns an array of Contacts who match the given term.
+  # Returns an array of Contacts who match the given key and value.
   def self.search(key, value)
     results = CONN.exec_params("SELECT * FROM contacts WHERE #{key} = $1;", [value])
     process_results(results)
@@ -65,19 +56,23 @@ class Contact
     contacts
   end
 
+  # Checks if the contact is persisted (i.e. if it exists in the database)
   def persisted?
     !id.nil?
   end
 
+  # Either updates an exisiting contact or saves a new contact.
   def save
-    if persisted?
-      # save updated info
+    if persisted? # save updated info
       CONN.exec_params("UPDATE contacts SET name = $1, email = $2 WHERE id = $3::int;", [@name, @email, @id])
-    else
-      #save new info
+    else #save new info
       result = CONN.exec_params("INSERT INTO contacts(name, email) VALUES ($1, $2) RETURNING id;", [@name, @email])
       @id = result[0]["id"]
     end
+  end
+
+  def destroy
+    CONN.exec_params("DELETE FROM contacts WHERE id = $1::int;", [@id])
   end
 
 end

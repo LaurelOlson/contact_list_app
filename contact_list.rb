@@ -14,6 +14,7 @@ class ContactList
       puts "\tshow \t- Show a contact"
       puts "\tsearch \t- Search contacts"
       puts "\tupdate \t- Update an existing contact"
+      puts "\tremove \t- Remove a contact"
     end
 
     command = ARGV[0] || STDIN.gets.chomp
@@ -29,6 +30,8 @@ class ContactList
       ContactList.search
     when 'update'
       ContactList.update
+    when 'remove'
+      ContactList.destroy
     end
   end
 
@@ -87,6 +90,13 @@ class ContactList
     puts "What is the new email for contact #{id}" unless ARGV[3]
     contact.email = ARGV[3] || STDIN.gets.chomp
     contact.save
+  end
+
+  def self.destroy
+    puts "What is the id of the contact you wish to delete?" unless ARGV[1]
+    id = ARGV[1] || STDIN.gets.chomp
+    contact = Contact.find(id)
+    contact.destroy
   end
 
   def self.paginate(contacts, per_page)
