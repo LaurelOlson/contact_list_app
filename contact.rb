@@ -50,7 +50,8 @@ class Contact
 
   # Returns the contact with the specified id. If no contact has the id, returns nil.
   def self.find(id)
-    CSV.read(CSV_FNAME)[(id-1)]
+    CONN.exec_params("SELECT * FROM contacts WHERE id = $1::int;", [id])
+    # CSV.read(CSV_FNAME)[(id-1)]
   end
 
   # Returns an array of Contacts who match the given term.

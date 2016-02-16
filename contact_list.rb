@@ -54,9 +54,9 @@ class ContactList
     id = (ARGV[1] || STDIN.gets.chomp).to_i
     contact = Contact.find(id)
     if contact
-      puts "name: #{contact[0]}"
-      puts "email: #{contact[1]}"
-      puts "phone number: #{contact[2]}"
+      puts "name: #{contact[0]['name']}"
+      puts "email: #{contact[0]['email']}"
+      # puts "phone number: #{contact[2]}"
     else
       puts "contact not found"
     end
