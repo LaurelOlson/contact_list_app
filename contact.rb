@@ -22,7 +22,7 @@ class Contact
 
   # Creates a string representation of Contact instances in contacts
   def to_s
-    "#{@id}: #{@name}\temail: #{@email}\tphone number(s): #{@phone_number}"
+    "#{@id}: #{@name}\temail: #{@email}"
   end
 
   # Returns an Array of Contacts loaded from the database.
@@ -50,23 +50,32 @@ class Contact
 
   # Returns the contact with the specified id. If no contact has the id, returns nil.
   def self.find(id)
-    CONN.exec_params("SELECT * FROM contacts WHERE id = $1::int;", [id])
+    CONN.exec_params("SELECT * FROM contacts WHERE id = $1::int LIMIT 1;", [id])
     # CSV.read(CSV_FNAME)[(id-1)]
   end
 
   # Returns an array of Contacts who match the given term.
-  def self.search(term)
+  def self.search(key, value)
     # matches = Contact.all.find { |contact| contact.name =~ /#{term}/ }
+    results = CONN.exec_params("SELECT * FROM contacts WHERE #{key} = $1;", [value])
+
     matches = []
-    id = 1
-    CSV.foreach(CSV_FNAME) do |row|
-      name = row[0]
-      email = row[1]
-      phone_number = row[2]
-      matches << Contact.new(name, email, phone_number, id) unless row.grep(/#{term}/).empty?
-      id += 1
+    results.each do |contact|
+      matches << Contact.new(contact["name"], contact["email"], contact["id"])
     end
+
     matches
+
+    # matches = []
+    # id = 1
+    # CSV.foreach(CSV_FNAME) do |row|
+    #   name = row[0]
+    #   email = row[1]
+    #   phone_number = row[2]
+    #   matches << Contact.new(name, email, phone_number, id) unless row.grep(/#{term}/).empty?
+    #   id += 1
+    # end
+    # matches
   end
 
   def persisted?

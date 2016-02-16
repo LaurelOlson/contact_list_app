@@ -63,9 +63,11 @@ class ContactList
   end
 
   def self.search
-    puts "Enter a search term (ex. name)" unless ARGV[1]
-    term = ARGV[1] || STDIN.gets.chomp 
-    formatted_matches = Contact.search(term).map { |match| match.to_s }
+    puts "Search by name, email, or index?" unless ARGV[1]
+    key = ARGV[1] || STDIN.gets.chomp 
+    puts "Which #{key} are you looking for?" unless ARGV[2]
+    value = ARGV[2] || STDIN.get.chomp
+    formatted_matches = Contact.search(key, value).map { |match| match.to_s }
     self.paginate(formatted_matches, 5)
   end
 
