@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require_relative 'phone_number'
 require_relative 'contact'
 require 'pry'
 
@@ -40,29 +41,59 @@ class ContactList
     name = ARGV[1] || STDIN.gets.chomp
     puts "Email:" unless ARGV[2]
     email = ARGV[2] || STDIN.gets.chomp
-    # puts "Phone number (separate type and number with a space, and multiple numbers with a semicolon ex. mobile: 778-999-7777; home 604-555-6666):" unless ARGV[3]
-    # phone_number = ARGV[3] || STDIN.gets.chomp
+    puts "Phone number (include type and number separated by a space, and multiple numbers separated by a semi-colon ex. mobile 7789997777; home 6045223456)" unless ARGV[3]
+    phone_numbers = (ARGV[3] || STDIN.gets.chomp).split('; ')
+    phone_number = Hash.new
+    phone_numbers.each do |entry|
+      type = entry.split(' ')[0]
+      number = entry.split(' ')[1]
+      phone_number[type.to_sym] = number
+    end
 
-    # if Contact.search(email).empty?
-    Contact.create(name, email)
-    # else
-      # puts "Contact already exists."
-    # end
+    if Contact.search('email', email).empty?
+      Contact.create(name, email, phone_number)
+    else
+      puts "Contact already exists."
+    end
   end
 
   def self.list
-    formatted_contacts = Contact.all.map { |contact| contact.to_s }
-    self.paginate(formatted_contacts, 5)
+    self.paginate(format_contacts(Contact.all) , 5)
+  end
+
+  def self.format_contacts(contacts)
+    formatted_contacts = []
+    contacts.each do |contact| 
+      contact.each_value do |value|
+        formatted_contacts << format_contact(value)
+      end
+    end
+    formatted_contacts
+  end
+
+  def self.format_contact(contact)
+    formatted_contact = ""
+    if contact.phone_number
+      numbers = []
+      contact.phone_number.each { |key, value| numbers << "#{key}: #{value}"}
+      formatted_contact += "#{contact.id}:\t#{contact.name}\temail: #{contact.email}\tphone number: "
+      numbers.each do |phone_number|
+        formatted_contact += "#{phone_number}\t"
+      end
+    else
+      formatted_contact += "#{contact.id}:\t#{contact.name}\temail: #{contact.email}"
+    end
+    formatted_contact
   end
 
   def self.show
     puts "what is the ID for the contact you wish to view?" unless ARGV[1]
     id = (ARGV[1] || STDIN.gets.chomp).to_i
-    contact = Contact.find(id)
+    contact = Contact.find(id) # this returns the contact
     if contact
-      puts "name: #{contact[0]['name']}"
-      puts "email: #{contact[0]['email']}"
-      # puts "phone number: #{contact[2]}"
+      puts "name: #{contact.name}"
+      puts "email: #{contact.email}"
+      puts "phone number: #{contact.phone_number}" if contact.phone_number
     else
       puts "contact not found"
     end
@@ -73,9 +104,9 @@ class ContactList
     key = ARGV[1] || STDIN.gets.chomp 
     if ['name', 'email', 'id'].include?(key)
       puts "Which #{key} are you looking for?" unless ARGV[2]
-      value = ARGV[2] || STDIN.get.chomp
-      formatted_matches = Contact.search(key, value).map { |match| match.to_s }
-      self.paginate(formatted_matches, 5)
+      value = ARGV[2] || STDIN.gets.chomp
+      formatted_matches = []
+      self.paginate(format_contacts(Contact.search(key, value)), 5)
     else
       puts "#{key} is not a valid search parameter"
     end
